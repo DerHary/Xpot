@@ -1,47 +1,72 @@
 # Xpot
 
-Offline-Tool zum Testen und Entwickeln von XPath-Ausdruecken.
+Xpot is a local offline tool for testing and developing XPath expressions.
 
-## Ziel
+## Why Xpot?
 
-Xpot ist fuer lokale XPath-Tests gedacht. Das Tool soll im Unternehmenskontext nutzbar sein, ohne dass XML-Daten, Testdaten oder Eingaben nach draussen gehen.
+The focus is enterprise use:
 
-## Aktueller Stand
+- inspect XML locally without sending data outside
+- develop and test XPath quickly
+- keep behavior controlled and dependency-free
+- deliberately avoid cloud services, CDNs, and external JavaScript
 
-Der aktuelle Prototyp besteht aus einer einzelnen Datei:
+## Current State
+
+The app currently runs fully locally via:
 
 - [xpot.html](./xpot.html)
+- [dependencies/app.js](./dependencies/app.js)
+- [dependencies/xpath-engine.js](./dependencies/xpath-engine.js)
+- [dependencies/suggestions.js](./dependencies/suggestions.js)
+- [dependencies/samples.js](./dependencies/samples.js)
+- [dependencies/styles.css](./dependencies/styles.css)
 
-Die Datei kann direkt lokal im Browser geoeffnet werden und enthaelt:
+Nothing is loaded from external sources.
 
-- einen XML-Editor
-- ein XPath-Eingabefeld
-- einfache XPath-Vorschlaege auf Basis des geladenen XML
-- eine Ergebnisanzeige
-- ein eingebautes XML-Beispiel mit Fahrzeugdaten
+## Features
 
-## Features im aktuellen Prototyp
+- local XML editing directly in the browser
+- local file imports for XML and similar text files
+- XPath evaluation with support for:
+  - node matches
+  - string results
+  - number results
+  - boolean results
+- context-aware XPath suggestions
+- clickable sample queries
+- local XPath history via `localStorage`
+- multiple sessions/tabs in the same browser
+- XML formatting
+- visual highlighting of matches in the XML tree
+- modern offline-only UI with no external assets
 
-- Vollstaendig lokal nutzbar
-- Keine externen Abhaengigkeiten
-- XML wird direkt im Browser per `DOMParser` geparst
-- XPath wird direkt im Browser per `document.evaluate(...)` ausgefuehrt
-- Vorschlaege fuer:
-  - Elementpfade
-  - Attributpfade
-  - einfache Filter-Ausdruecke
-  - `text()`-Zugriffe
-- Sofortiges Testen von XPath-Ausdruecken per Button
+## Security Direction
 
-## Verwendung
+Xpot is designed for local use.
 
-1. Repository klonen oder herunterladen
-2. `xpot.html` lokal im Browser oeffnen
-3. XML im oberen Bereich anpassen oder ersetzen
-4. XPath eingeben
-5. `Testen` klicken
+Current guardrails:
 
-## Beispiel-XPath
+- no external scripts or libraries
+- `Content-Security-Policy` against external loading paths
+- `connect-src 'none'`
+- network APIs such as `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource`, and `sendBeacon` are blocked in the app
+- XML is processed as data, not as an executable page
+
+Important:
+
+- Xpot is a local browser tool, not a fully isolated sandbox container
+- for stricter security requirements, a dedicated desktop wrapper with tighter permissions would make sense later
+
+## Usage
+
+1. Clone or download the repository
+2. Open [xpot.html](./xpot.html) locally in the browser
+3. Insert XML or import it via `Load File`
+4. Enter an XPath expression
+5. Click `Run` or press `Enter`
+
+## Sample Queries
 
 ```xpath
 //marke/@name
@@ -49,48 +74,27 @@ Die Datei kann direkt lokal im Browser geoeffnet werden und enthaelt:
 //modell[kraftstoff='Elektro']/name/text()
 //modell[leistung_ps > 500]/name/text()
 //marke[@name='Audi']/modell[name='RS6 Avant']/preis_eur/text()
-//marke[@name='Mercedes-Benz']/@land
+count(//modell)
 ```
 
-## Technischer Aufbau
+## Project Structure
 
-Aktuell ist alles in einer Datei umgesetzt:
+```text
+Xpot/
+|- xpot.html
+|- README.md
+|- .gitignore
+\- dependencies/
+   |- app.js
+   |- samples.js
+   |- styles.css
+   |- suggestions.js
+   \- xpath-engine.js
+```
 
-- HTML fuer Struktur
-- eingebettetes CSS fuer das UI
-- eingebettetes JavaScript fuer Parsing, Vorschlaege und XPath-Auswertung
+## Next Useful Steps
 
-Wichtige Funktionen in `xpot.html`:
-
-- `parseXml()`
-- `buildSuggestions()`
-- `showSuggestions()`
-- `runXPath()`
-
-## Sicherheitsziel
-
-Xpot soll ausschliesslich lokal laufen.
-
-Wichtige Leitplanken:
-
-- keine Datenuebertragung nach aussen
-- keine externen Skripte oder Libraries
-- geeignet fuer sensible XML-Daten im Unternehmensumfeld
-- Fokus auf kontrollierbares, nachvollziehbares Offline-Verhalten
-
-## Bekannte Grenzen des aktuellen Prototyps
-
-- noch kein Datei-Import fuer XML
-- noch kein Datei-Export
-- noch keine visuelle Hervorhebung gefundener Knoten
-- Vorschlaege sind einfach und nicht voll kontextsensitiv
-- gesamter Code liegt noch in einer einzigen HTML-Datei
-- Security-Haertung fuer problematische Testinhalte ist noch nicht abgeschlossen
-
-## Naechste sinnvolle Schritte
-
-- XML-Dateiimport
-- bessere XPath-Autovervollstaendigung
-- Aufteilung in HTML, CSS und JavaScript
-- weitere Security-Haertung fuer Unternehmensnutzung
-- bessere UX fuer Fehler, Treffer und grosse XML-Daten
+- even stricter isolation for high-security environments
+- performance testing with larger XML files
+- optional search/filter functions in the XML tree
+- export of sessions or XPath collections

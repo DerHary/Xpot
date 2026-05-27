@@ -1,365 +1,156 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Offline XPath Tester - Autos</title>
-
-<style>
-body{
-    font-family: Arial, sans-serif;
-    background:#1e1e1e;
-    color:#fff;
-    margin:20px;
-}
-
-textarea,input{
-    width:100%;
-    box-sizing:border-box;
-    background:#2d2d2d;
-    color:#fff;
-    border:1px solid #555;
-    padding:10px;
-    margin-bottom:15px;
-    font-family: Consolas, monospace;
-}
-
-textarea{
-    height:360px;
-}
-
-button{
-    padding:10px 20px;
-    background:#0078d4;
-    color:white;
-    border:none;
-    cursor:pointer;
-    margin-bottom:15px;
-}
-
-pre{
-    background:#111;
-    padding:15px;
-    overflow:auto;
-    border:1px solid #444;
-    white-space:pre-wrap;
-}
-
-.suggestions{
-    background:#111;
-    border:1px solid #444;
-    margin-top:-10px;
-    margin-bottom:15px;
-    max-height:220px;
-    overflow:auto;
-    font-family: Consolas, monospace;
-}
-
-.suggestion{
-    padding:8px 10px;
-    cursor:pointer;
-    border-bottom:1px solid #333;
-}
-
-.suggestion:hover{
-    background:#333;
-}
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; font-src 'self'; object-src 'none'; media-src 'none'; frame-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none';">
+<title>Xpot - Offline XPath Workbench</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23091623'/%3E%3Cpath d='M16 20h32M22 32h20M16 44h32' stroke='%232fd6c4' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="dependencies/styles.css">
 </head>
 <body>
+<div class="app-shell">
+    <header class="hero">
+        <div class="hero-headline">
+            <p class="eyebrow">Offline XPath Workbench</p>
+            <div class="hero-title-row">
+                <img class="hero-logo" src="dependencies/xpot-logo.png" alt="Xpot">
+                <p class="hero-copy">
+                    Xpath offline Tool - no Cloud, no external Traffic - Develope and test your Xpath in a save local Environment
+                </p>
+            </div>
+        </div>
+    </header>
 
-<h2>Offline XPath Tester - Autos</h2>
+    <section class="session-strip panel">
+        <div class="panel-header compact">
+            <div>
+                <h2>Sessions</h2>
+                <p>Keep multiple XML/XPath contexts locally in parallel.</p>
+            </div>
+            <div class="session-actions">
+                <button id="new-empty-session" class="ghost-button" type="button">New Empty Session</button>
+                <button id="import-session-file" class="ghost-button" type="button">Import File as Session</button>
+                <button id="new-session" class="ghost-button" type="button">New From Sample</button>
+                <label class="select-wrap compact-select" for="session-sample-select">
+                    <span>Sample Set</span>
+                    <select id="session-sample-select">
+                        <option value="">Select</option>
+                    </select>
+                </label>
+                <input id="file-input" type="file" accept=".xml,.txt,.svg,.html,.xhtml" hidden>
+            </div>
+        </div>
+        <div id="session-tabs" class="session-tabs" role="tablist" aria-label="Sessions"></div>
+    </section>
 
-<label>XML</label>
-<textarea id="xml" oninput="buildSuggestions()">
-<autos>
-    <marke name="BMW" land="Deutschland">
-        <modell>
-            <name>330i</name>
-            <baujahr>2023</baujahr>
-            <leistung_ps>258</leistung_ps>
-            <antrieb>Heckantrieb</antrieb>
-            <kraftstoff>Benzin</kraftstoff>
-            <preis_eur>52000</preis_eur>
-        </modell>
-        <modell>
-            <name>M3 Competition</name>
-            <baujahr>2024</baujahr>
-            <leistung_ps>510</leistung_ps>
-            <antrieb>Allrad</antrieb>
-            <kraftstoff>Benzin</kraftstoff>
-            <preis_eur>97000</preis_eur>
-        </modell>
-        <modell>
-            <name>i4 M50</name>
-            <baujahr>2024</baujahr>
-            <leistung_ps>544</leistung_ps>
-            <antrieb>Allrad</antrieb>
-            <kraftstoff>Elektro</kraftstoff>
-            <preis_eur>72000</preis_eur>
-        </modell>
-    </marke>
+    <section class="workspace-grid">
+        <div class="column column-main">
+            <section class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>XML</h2>
+                        <p>Edit, load, and format local test data.</p>
+                    </div>
+                    <div class="toolbar">
+                        <button id="format-xml" class="ghost-button" type="button">Format XML</button>
+                    </div>
+                </div>
 
-    <marke name="Audi" land="Deutschland">
-        <modell>
-            <name>A4 Avant</name>
-            <baujahr>2023</baujahr>
-            <leistung_ps>204</leistung_ps>
-            <antrieb>Frontantrieb</antrieb>
-            <kraftstoff>Diesel</kraftstoff>
-            <preis_eur>48000</preis_eur>
-        </modell>
-        <modell>
-            <name>RS6 Avant</name>
-            <baujahr>2024</baujahr>
-            <leistung_ps>630</leistung_ps>
-            <antrieb>Quattro</antrieb>
-            <kraftstoff>Benzin</kraftstoff>
-            <preis_eur>135000</preis_eur>
-        </modell>
-        <modell>
-            <name>Q8 e-tron</name>
-            <baujahr>2024</baujahr>
-            <leistung_ps>408</leistung_ps>
-            <antrieb>Allrad</antrieb>
-            <kraftstoff>Elektro</kraftstoff>
-            <preis_eur>82000</preis_eur>
-        </modell>
-    </marke>
+                <div class="session-meta">
+                    <label class="field">
+                        <span>Session Name</span>
+                        <input id="session-name" type="text" maxlength="80" autocomplete="off">
+                    </label>
+                    <div id="xml-status" class="status-card neutral" aria-live="polite">
+                        <strong>XML Status</strong>
+                        <span>Waiting for input.</span>
+                    </div>
+                </div>
 
-    <marke name="Mercedes-Benz" land="Deutschland">
-        <modell>
-            <name>C 300</name>
-            <baujahr>2024</baujahr>
-            <leistung_ps>258</leistung_ps>
-            <antrieb>Heckantrieb</antrieb>
-            <kraftstoff>Benzin</kraftstoff>
-            <preis_eur>56000</preis_eur>
-        </modell>
-        <modell>
-            <name>AMG E 63 S</name>
-            <baujahr>2023</baujahr>
-            <leistung_ps>612</leistung_ps>
-            <antrieb>4MATIC+</antrieb>
-            <kraftstoff>Benzin</kraftstoff>
-            <preis_eur>128000</preis_eur>
-        </modell>
-        <modell>
-            <name>EQE 350+</name>
-            <baujahr>2024</baujahr>
-            <leistung_ps>292</leistung_ps>
-            <antrieb>Heckantrieb</antrieb>
-            <kraftstoff>Elektro</kraftstoff>
-            <preis_eur>74000</preis_eur>
-        </modell>
-    </marke>
+                <textarea id="xml-editor" spellcheck="false" aria-label="XML Editor"></textarea>
+            </section>
 
-    <marke name="Toyota" land="Japan">
-        <modell>
-            <name>Corolla Hybrid</name>
-            <baujahr>2024</baujahr>
-            <leistung_ps>140</leistung_ps>
-            <antrieb>Frontantrieb</antrieb>
-            <kraftstoff>Hybrid</kraftstoff>
-            <preis_eur>33000</preis_eur>
-        </modell>
-        <modell>
-            <name>GR Supra</name>
-            <baujahr>2023</baujahr>
-            <leistung_ps>340</leistung_ps>
-            <antrieb>Heckantrieb</antrieb>
-            <kraftstoff>Benzin</kraftstoff>
-            <preis_eur>67000</preis_eur>
-        </modell>
-        <modell>
-            <name>RAV4 Plug-in Hybrid</name>
-            <baujahr>2024</baujahr>
-            <leistung_ps>306</leistung_ps>
-            <antrieb>Allrad</antrieb>
-            <kraftstoff>Plug-in-Hybrid</kraftstoff>
-            <preis_eur>59000</preis_eur>
-        </modell>
-    </marke>
-</autos>
-</textarea>
+            <section class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>XPath</h2>
+                        <p>Press Enter to run. History stays local in the browser.</p>
+                    </div>
+                    <div class="toolbar">
+                        <button id="run-xpath" class="primary-button" type="button">Run</button>
+                        <button id="clear-xpath" class="ghost-button" type="button">Clear XPath</button>
+                        <button id="clear-history" class="ghost-button" type="button">Clear History</button>
+                    </div>
+                </div>
 
-<label>XPath</label>
-<input id="xpath" value="//marke[@name='BMW']/modell/name/text()" oninput="showSuggestions()" autocomplete="off">
+                <div class="xpath-grid">
+                    <label class="field">
+                        <span>XPath Expression</span>
+                        <input id="xpath-input" type="text" autocomplete="off" spellcheck="false">
+                    </label>
+                    <div id="xpath-status" class="status-card neutral" aria-live="polite">
+                        <strong>XPath Status</strong>
+                        <span>Not executed yet.</span>
+                    </div>
+                </div>
 
-<div id="suggestions" class="suggestions"></div>
+                <div id="suggestions" class="suggestions" aria-live="polite"></div>
 
-<button onclick="runXPath()">Testen</button>
+                <div class="history-block">
+                    <div class="subheading-row">
+                        <h3>History</h3>
+                        <span class="muted">Stored locally</span>
+                    </div>
+                    <div id="history-list" class="chip-list"></div>
+                </div>
 
-<h3>Ergebnis</h3>
-<pre id="output"></pre>
+                <div class="history-block">
+                    <div class="subheading-row">
+                        <h3>Sample Queries</h3>
+                        <span class="muted">Clickable</span>
+                    </div>
+                    <div id="quick-examples" class="chip-list"></div>
+                </div>
+            </section>
+        </div>
 
-<h3>Beispiele</h3>
-<pre>
-// Alle Marken:
-//marke/@name
+        <div class="column column-side">
+            <section class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Result</h2>
+                        <p>Matches, types, and values at a glance.</p>
+                    </div>
+                </div>
 
-// Alle BMW-Modelle:
-//marke[@name='BMW']/modell/name/text()
+                <div id="result-summary" class="summary-grid"></div>
+                <pre id="result-output" class="result-output">No evaluation yet.</pre>
 
-// Alle Elektroautos:
-//modell[kraftstoff='Elektro']/name/text()
+                <div class="subheading-row">
+                    <h3>Match Details</h3>
+                    <span id="result-count" class="muted">0 matches</span>
+                </div>
+                <div id="result-details" class="result-details"></div>
+            </section>
 
-// Alle Fahrzeuge über 500 PS:
-//modell[leistung_ps &gt; 500]/name/text()
+            <section class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>XML Structure</h2>
+                        <p>Matches are highlighted in the local tree.</p>
+                    </div>
+                </div>
+                <div id="xml-tree" class="xml-tree" aria-live="polite"></div>
+            </section>
+        </div>
+    </section>
+</div>
+<div id="xml-tree-menu" class="context-menu" hidden></div>
 
-// Preis vom Audi RS6:
-//marke[@name='Audi']/modell[name='RS6 Avant']/preis_eur/text()
-
-// Herkunftsland von Mercedes-Benz:
-//marke[@name='Mercedes-Benz']/@land
-</pre>
-
-<script>
-let xpathSuggestions = [];
-
-function parseXml(){
-    const xmlText = document.getElementById("xml").value;
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-
-    if(xmlDoc.querySelector("parsererror")){
-        return null;
-    }
-
-    return xmlDoc;
-}
-
-function buildSuggestions(){
-    const xmlDoc = parseXml();
-
-    if(!xmlDoc){
-        xpathSuggestions = [];
-        showSuggestions();
-        return;
-    }
-
-    const suggestions = new Set();
-
-    function walk(node, path){
-        if(node.nodeType !== Node.ELEMENT_NODE){
-            return;
-        }
-
-        const currentPath = path + "/" + node.nodeName;
-
-        suggestions.add("//" + node.nodeName);
-        suggestions.add(currentPath);
-        suggestions.add(currentPath + "/text()");
-
-        for(const attr of node.attributes){
-            suggestions.add("//" + node.nodeName + "/@" + attr.name);
-            suggestions.add("//" + node.nodeName + "[@" + attr.name + "='" + attr.value + "']");
-            suggestions.add("//" + node.nodeName + "[@" + attr.name + "='" + attr.value + "']/text()");
-        }
-
-        const text = node.childNodes.length === 1 && node.firstChild.nodeType === Node.TEXT_NODE
-            ? node.textContent.trim()
-            : "";
-
-        if(text){
-            suggestions.add("//" + node.nodeName + "[text()='" + text + "']");
-            suggestions.add("//" + node.nodeName + "[contains(text(),'" + text + "')]");
-        }
-
-        for(const child of node.children){
-            suggestions.add("//" + node.nodeName + "/" + child.nodeName);
-            suggestions.add("//" + node.nodeName + "/" + child.nodeName + "/text()");
-
-            const childText = child.textContent.trim();
-
-            if(child.children.length === 0 && childText){
-                suggestions.add("//" + node.nodeName + "[" + child.nodeName + "='" + childText + "']");
-                suggestions.add("//" + node.nodeName + "[" + child.nodeName + "='" + childText + "']/" + child.nodeName + "/text()");
-            }
-
-            walk(child, currentPath);
-        }
-    }
-
-    walk(xmlDoc.documentElement, "");
-
-    xpathSuggestions = Array.from(suggestions).sort();
-    showSuggestions();
-}
-
-function showSuggestions(){
-    const input = document.getElementById("xpath");
-    const box = document.getElementById("suggestions");
-    const value = input.value.toLowerCase().trim();
-
-    box.innerHTML = "";
-
-    if(!value){
-        return;
-    }
-
-    const matches = xpathSuggestions
-        .filter(s => s.toLowerCase().includes(value))
-        .slice(0, 20);
-
-    for(const match of matches){
-        const div = document.createElement("div");
-        div.className = "suggestion";
-        div.textContent = match;
-
-        div.onclick = function(){
-            input.value = match;
-            box.innerHTML = "";
-            runXPath();
-        };
-
-        box.appendChild(div);
-    }
-}
-
-function runXPath(){
-
-    const xmlDoc = parseXml();
-    const xpath = document.getElementById("xpath").value;
-    const output = document.getElementById("output");
-
-    if(!xmlDoc){
-        output.textContent = "XML Fehler";
-        return;
-    }
-
-    try{
-        const result = xmlDoc.evaluate(
-            xpath,
-            xmlDoc,
-            null,
-            XPathResult.ANY_TYPE,
-            null
-        );
-
-        let node;
-        let values = [];
-
-        while(node = result.iterateNext()){
-
-            if(node.nodeType === Node.ATTRIBUTE_NODE){
-                values.push(node.value);
-            }
-            else{
-                values.push(node.textContent);
-            }
-        }
-
-        output.textContent = values.length === 0
-            ? "Keine Treffer"
-            : values.join("\n");
-
-    }catch(err){
-        output.textContent = "XPath Fehler:\n\n" + err;
-    }
-}
-
-buildSuggestions();
-</script>
-
+<script src="dependencies/samples.js"></script>
+<script src="dependencies/suggestions.js"></script>
+<script src="dependencies/xpath-engine.js"></script>
+<script src="dependencies/app.js"></script>
 </body>
 </html>

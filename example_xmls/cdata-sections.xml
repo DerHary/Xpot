@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<codeSnippets xmlns="http://sample-files.com/samples/xml/cdata"
+              description="Sample XML file demonstrating CDATA sections with embedded code and markup">
+
+  <snippet language="html" title="Login Form">
+    <description>A basic HTML login form with inline styles</description>
+    <code><![CDATA[
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Login</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-weight: bold; margin-bottom: 4px; }
+    input[type="text"], input[type="password"] { width: 300px; padding: 8px; border: 1px solid #ccc; }
+    button { padding: 10px 24px; background: #0066cc; color: #fff; border: none; cursor: pointer; }
+    button:hover { background: #0052a3; }
+  </style>
+</head>
+<body>
+  <h1>Sign In</h1>
+  <form action="/login" method="POST">
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" required>
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required>
+    </div>
+    <button type="submit">Log In</button>
+  </form>
+</body>
+</html>
+    ]]></code>
+  </snippet>
+
+  <snippet language="javascript" title="Fetch API Example">
+    <description>JavaScript code that fetches JSON data from an API</description>
+    <code><![CDATA[
+async function fetchUsers() {
+  try {
+    const response = await fetch('https://api.example.com/users?page=1&limit=10');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    
+    // Filter active users where age > 18 && verified === true
+    const activeUsers = data.users.filter(user => user.active && user.age > 18);
+    
+    console.log(`Found ${activeUsers.length} active users`);
+    return activeUsers;
+  } catch (error) {
+    console.error('Failed to fetch users:', error.message);
+    return [];
+  }
+}
+
+// Special characters that would break XML without CDATA: < > & " '
+// Example: if (x < 10 && y > 20) { return x & y; }
+    ]]></code>
+  </snippet>
+
+  <snippet language="sql" title="Database Query">
+    <description>SQL query with special characters that require CDATA wrapping</description>
+    <code><![CDATA[
+-- Find customers with orders > $100 placed in the last 30 days
+SELECT 
+    c.customer_id,
+    c.first_name || ' ' || c.last_name AS full_name,
+    c.email,
+    COUNT(o.order_id) AS order_count,
+    SUM(o.total_amount) AS total_spent
+FROM customers c
+INNER JOIN orders o ON c.customer_id = o.customer_id
+WHERE o.order_date >= CURRENT_DATE - INTERVAL '30 days'
+  AND o.total_amount > 100.00
+  AND o.status <> 'cancelled'
+GROUP BY c.customer_id, c.first_name, c.last_name, c.email
+HAVING SUM(o.total_amount) > 500.00
+ORDER BY total_spent DESC
+LIMIT 50;
+
+/* Characters that need CDATA: <, >, &, <> (not equal), && */
+    ]]></code>
+  </snippet>
+
+  <snippet language="xml" title="Embedded XML Example">
+    <description>Raw XML markup stored inside a CDATA section to avoid parsing</description>
+    <code><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog>
+  <book id="1">
+    <title>XML & XSLT: A Developer's Guide</title>
+    <author>Jane Smith</author>
+    <price currency="USD">49.99</price>
+    <description>Learn XML, XPath, XSLT & XQuery — all in one book!</description>
+  </book>
+  <book id="2">
+    <title>Data Formats: JSON vs XML</title>
+    <author>John Doe</author>
+    <price currency="EUR">39.99</price>
+  </book>
+</catalog>
+    ]]></code>
+  </snippet>
+
+  <snippet language="python" title="XML Parser">
+    <description>Python code for parsing XML with special character handling</description>
+    <code><![CDATA[
+import xml.etree.ElementTree as ET
+
+def parse_catalog(xml_path):
+    """Parse a book catalog XML file and extract book data."""
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+    
+    books = []
+    for book in root.findall('.//book'):
+        title = book.find('title').text
+        author = book.find('author').text
+        price_elem = book.find('price')
+        price = float(price_elem.text)
+        currency = price_elem.get('currency', 'USD')
+        
+        # Check if price < 50 && currency == 'USD'
+        if price < 50 and currency == 'USD':
+            books.append({
+                'title': title,
+                'author': author,
+                'price': f'{currency} {price:.2f}'
+            })
+    
+    return books
+
+if __name__ == '__main__':
+    results = parse_catalog('catalog.xml')
+    for book in results:
+        print(f"  {book['title']} by {book['author']} — {book['price']}")
+    ]]></code>
+  </snippet>
+
+</codeSnippets>
