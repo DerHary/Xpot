@@ -1,2 +1,10 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Help GitHub Linguist classify the repo more accurately
+*.js linguist-language=JavaScript
+*.css linguist-language=CSS
+*.html linguist-language=HTML
+
+# Example XML files are test/demo assets, not core source
+example_xmls/* linguist-vendored
