@@ -72,3 +72,7 @@ Important:
 //snippet[@language='javascript']/code/text()
 count(//PLANT[LIGHT='Mostly Shady'])
 ```
+
+## AI Note
+
+This app is vibe-coded and was developed with AI assistance.
