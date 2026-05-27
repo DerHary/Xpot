@@ -47,14 +47,6 @@ Xpot is built for local XML/XPath work without sending data outside your machine
 
 Xpot is designed to stay local.
 
-Current guardrails:
-
-- no external scripts or libraries
-- `Content-Security-Policy` in the app shell
-- `connect-src 'none'`
-- network APIs such as `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource`, and `sendBeacon` are blocked in the app
-- XML content is handled as data, not executed as app logic
-
 Important:
 
 - Xpot is still a browser-based local tool, not a hardened sandbox runtime
@@ -71,17 +63,6 @@ Important:
 4. Enter an XPath expression and run it.
 5. Use `XML Structure` for right-click XPath actions.
 
-## Example XML Files
-
-Repository examples live in [example_xmls](./example_xmls):
-
-- [simple.xml](./example_xmls/simple.xml)
-- [plant_catalog.xml](./example_xmls/plant_catalog.xml)
-- [cd_catalog.xml](./example_xmls/cd_catalog.xml)
-- [complex-nested.xml](./example_xmls/complex-nested.xml)
-- [cdata-sections.xml](./example_xmls/cdata-sections.xml)
-- [large-dataset.xml](./example_xmls/large-dataset.xml)
-
 ## Example Queries
 
 ```xpath
@@ -91,9 +72,3 @@ Repository examples live in [example_xmls](./example_xmls):
 //snippet[@language='javascript']/code/text()
 count(//PLANT[LIGHT='Mostly Shady'])
 ```
-
-## Notes
-
-- `large-dataset.xml` is useful for stress testing, but it is also the file most likely to expose current UI/performance limits.
-- CDATA content is supported better than before, but still deserves further refinement.
-- namespace-heavy XML is not fully polished yet.
