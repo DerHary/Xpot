@@ -2,6 +2,8 @@
 
 # Xpot
 
+![Xpot Screenshot](dependencies/xpot_screenshot.jpg)
+
 Xpot is a local offline tool for testing and developing XPath expressions.
 
 ## What It Is
