@@ -422,9 +422,11 @@ function renderSessionSampleSelect() {
 function renderQuickExamples(sampleId) {
     const activeSession = getActiveSession();
     const sample = sampleId ? getSampleById(sampleId) : null;
-    const examples = activeSession.quickExamples.length > 0
+    const baseExamples = activeSession.quickExamples.length > 0
         ? activeSession.quickExamples
         : sample?.examples ?? [];
+    const contextualExamples = generateResultContextExamples(appState.currentResultItems);
+    const examples = [...new Set([...contextualExamples, ...baseExamples])].slice(0, 16);
 
     elements.quickExamples.textContent = "";
 
@@ -448,6 +450,70 @@ function renderQuickExamples(sampleId) {
         });
         elements.quickExamples.appendChild(button);
     }
+}
+
+function generateResultContextExamples(resultItems) {
+    if (!Array.isArray(resultItems) || resultItems.length === 0) {
+        return [];
+    }
+
+    const contextual = new Set();
+    const seenKeys = new Set();
+
+    for (const item of resultItems.slice(0, 3)) {
+        const node = item.node;
+        const kind = item.kind;
+        const key = `${kind}:${item.path}`;
+
+        if (seenKeys.has(key)) {
+            continue;
+        }
+        seenKeys.add(key);
+
+        contextual.add(item.path);
+
+        if (node.nodeType === Node.ELEMENT_NODE) {
+            contextual.add(`//${node.nodeName}`);
+
+            if (node.parentElement) {
+                contextual.add(`//${node.parentElement.nodeName}/${node.nodeName}`);
+            }
+
+            for (const attribute of Array.from(node.attributes).slice(0, 2)) {
+                contextual.add(`//${node.nodeName}/@${attribute.name}`);
+                contextual.add(`//${node.nodeName}[@${attribute.name}=${quoteXPathLiteral(attribute.value)}]`);
+            }
+
+            const leafChildren = Array.from(node.children)
+                .filter((child) => child.children.length === 0 && child.textContent.trim())
+                .slice(0, 2);
+
+            for (const child of leafChildren) {
+                contextual.add(`//${node.nodeName}/${child.nodeName}/text()`);
+                contextual.add(`//${child.nodeName}[text()=${quoteXPathLiteral(child.textContent.trim())}]/../${node.nodeName}`);
+            }
+        } else if (node.nodeType === Node.ATTRIBUTE_NODE) {
+            const owner = node.ownerElement;
+            if (owner) {
+                contextual.add(`//${owner.nodeName}/@${node.name}`);
+                contextual.add(`//${owner.nodeName}[@${node.name}]`);
+                contextual.add(`//${owner.nodeName}[@${node.name}=${quoteXPathLiteral(node.value)}]`);
+            }
+        } else if (node.nodeType === Node.TEXT_NODE || node.nodeType === Node.CDATA_SECTION_NODE) {
+            const parent = node.parentElement;
+            const textValue = node.textContent.trim();
+            if (parent && textValue) {
+                contextual.add(`//${parent.nodeName}/text()`);
+                contextual.add(`//${parent.nodeName}[text()=${quoteXPathLiteral(textValue)}]`);
+
+                if (parent.parentElement) {
+                    contextual.add(`//${parent.nodeName}[contains(text(), ${quoteXPathLiteral(textValue.slice(0, 24))})]/../${parent.parentElement.nodeName}`);
+                }
+            }
+        }
+    }
+
+    return Array.from(contextual).filter(Boolean).slice(0, 8);
 }
 
 function generateQuickExamples(xmlDoc) {
@@ -731,6 +797,7 @@ function clearResults(message = "No evaluation yet.") {
     elements.resultSummary.textContent = "";
     elements.resultDetails.textContent = "";
     elements.resultCount.textContent = "0 matches";
+    renderQuickExamples(getActiveSession().sampleId);
 
     if (appState.currentXmlDoc) {
         xpathEngine.renderXmlTree(elements.xmlTree, appState.currentXmlDoc, []);
@@ -817,6 +884,7 @@ function runXPath() {
     });
 
     appState.currentResultItems = evaluation.items;
+    renderQuickExamples(getActiveSession().sampleId);
 
     if (evaluation.kind === "scalar") {
         setStatus(elements.xpathStatus, "success", "XPath Status", `Scalar result: ${evaluation.scalar.type}`);

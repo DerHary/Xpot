@@ -1,19 +1,19 @@
+![Xpot Logo](dependencies/xpot-logo.png)
+
 # Xpot
 
 Xpot is a local offline tool for testing and developing XPath expressions.
 
-## Why Xpot?
+## What It Is
 
-The focus is enterprise use:
+Xpot is built for local XML/XPath work without sending data outside your machine.
 
-- inspect XML locally without sending data outside
-- develop and test XPath quickly
-- keep behavior controlled and dependency-free
-- deliberately avoid cloud services, CDNs, and external JavaScript
+- local-only usage
+- no cloud backend
+- no external libraries or CDNs
+- intended for enterprise-safe XPath testing workflows
 
-## Current State
-
-The app currently runs fully locally via:
+## Current App Structure
 
 - [xpot.html](./xpot.html)
 - [dependencies/app.js](./dependencies/app.js)
@@ -21,80 +21,79 @@ The app currently runs fully locally via:
 - [dependencies/suggestions.js](./dependencies/suggestions.js)
 - [dependencies/samples.js](./dependencies/samples.js)
 - [dependencies/styles.css](./dependencies/styles.css)
+- [dependencies/xpot-logo.png](./dependencies/xpot-logo.png)
 
-Nothing is loaded from external sources.
+## Current Features
 
-## Features
-
-- local XML editing directly in the browser
-- local file imports for XML and similar text files
-- XPath evaluation with support for:
+- local XML editing in the browser
+- multiple sessions
+- create a new empty session
+- create a new session from a sample set
+- import a file as a new session
+- XML formatting
+- XPath evaluation for:
   - node matches
   - string results
   - number results
   - boolean results
-- context-aware XPath suggestions
-- clickable sample queries
+- auto-generated sample queries based on XML structure
+- result-based follow-up sample queries
 - local XPath history via `localStorage`
-- multiple sessions/tabs in the same browser
-- XML formatting
-- visual highlighting of matches in the XML tree
-- modern offline-only UI with no external assets
+- XML structure tree with match highlighting
+- right-click XPath context menu inside `XML Structure`
+- basic CDATA-aware handling in tree rendering and query generation
 
 ## Security Direction
 
-Xpot is designed for local use.
+Xpot is designed to stay local.
 
 Current guardrails:
 
 - no external scripts or libraries
-- `Content-Security-Policy` against external loading paths
+- `Content-Security-Policy` in the app shell
 - `connect-src 'none'`
 - network APIs such as `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource`, and `sendBeacon` are blocked in the app
-- XML is processed as data, not as an executable page
+- XML content is handled as data, not executed as app logic
 
 Important:
 
-- Xpot is a local browser tool, not a fully isolated sandbox container
-- for stricter security requirements, a dedicated desktop wrapper with tighter permissions would make sense later
+- Xpot is still a browser-based local tool, not a hardened sandbox runtime
+- very large XML files and namespace-heavy XML are still areas that need more hardening
 
 ## Usage
 
-1. Clone or download the repository
-2. Open [xpot.html](./xpot.html) locally in the browser
-3. Insert XML or import it via `Load File`
-4. Enter an XPath expression
-5. Click `Run` or press `Enter`
+1. Open [xpot.html](./xpot.html) locally in the browser.
+2. Create a session:
+   - `New Empty Session`
+   - `Import File as Session`
+   - `New From Sample`
+3. Edit XML or load a file into its own session.
+4. Enter an XPath expression and run it.
+5. Use `XML Structure` for right-click XPath actions.
 
-## Sample Queries
+## Example XML Files
+
+Repository examples live in [example_xmls](./example_xmls):
+
+- [simple.xml](./example_xmls/simple.xml)
+- [plant_catalog.xml](./example_xmls/plant_catalog.xml)
+- [cd_catalog.xml](./example_xmls/cd_catalog.xml)
+- [complex-nested.xml](./example_xmls/complex-nested.xml)
+- [cdata-sections.xml](./example_xmls/cdata-sections.xml)
+- [large-dataset.xml](./example_xmls/large-dataset.xml)
+
+## Example Queries
 
 ```xpath
-//marke/@name
-//marke[@name='BMW']/modell/name/text()
-//modell[kraftstoff='Elektro']/name/text()
-//modell[leistung_ps > 500]/name/text()
-//marke[@name='Audi']/modell[name='RS6 Avant']/preis_eur/text()
-count(//modell)
+//CD[ARTIST[contains(text(), 'Bob Dylan')]]/TITLE/text()
+//ARTIST[contains(text(), 'Bob Dylan')]/../TITLE/text()
+//component[dependencies/dependency[@type='environment-variable']]/name/text()
+//snippet[@language='javascript']/code/text()
+count(//PLANT[LIGHT='Mostly Shady'])
 ```
 
-## Project Structure
+## Notes
 
-```text
-Xpot/
-|- xpot.html
-|- README.md
-|- .gitignore
-\- dependencies/
-   |- app.js
-   |- samples.js
-   |- styles.css
-   |- suggestions.js
-   \- xpath-engine.js
-```
-
-## Next Useful Steps
-
-- even stricter isolation for high-security environments
-- performance testing with larger XML files
-- optional search/filter functions in the XML tree
-- export of sessions or XPath collections
+- `large-dataset.xml` is useful for stress testing, but it is also the file most likely to expose current UI/performance limits.
+- CDATA content is supported better than before, but still deserves further refinement.
+- namespace-heavy XML is not fully polished yet.
